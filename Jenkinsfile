@@ -25,8 +25,10 @@ node {
         }
     }
 
-    stage('Ansible Deploy') {
-                // Use Ansible to deploy the application
-                ansiblePlaybook(playbook: 'deploy.yml', inventory: 'inventory.ini')
-    }
+    stage('Run Ansible Playbook') {
+            steps {
+                sh 'ansible-playbook  kubectl-setup-playbook.yml'
+            }
+        }
+
 }
