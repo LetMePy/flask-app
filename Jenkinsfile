@@ -1,36 +1,27 @@
-pipeline {
-    environment {
-        registry = "skandersoltane/flask-hello-world"
-        registryCredential = 'dckr_pat_iTj37v7dE4n0_IG1vzZySi33EY8'
-        dockerImage = 'flask-hello-world'
+node {
+    def app
+
+    stage('Clone repository') {
+        /* Let's make sure we have the repository cloned to our workspace */
+
+        checkout scm
     }
-    agent any
-    stages {
-        stage('Cloning our Git') {
-            steps {
-                git 'https://github.com/LetMePy/flask-app.git'
-            }
-        }
-        stage('Building our image') {
-            steps {
-                script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
-            }
-        }
-        stage('Deploy our image') {
-            steps {
-                script {
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                    }
-                }
-            }
-        }
-        stage('Cleaning up') {
-            steps {
-                sh "docker rmi $registry:$BUILD_NUMBER"
-            }
+
+    stage('Build image') {
+        /* This builds the actual image; synonymous to
+         * docker build on the command line */
+
+        app = docker.build("skandersoltane/flask-hello-world")
+    }
+
+    stage('Push image') {
+        /* Finally, we'll push the image with two tags:
+         * First, the incremental build number from Jenkins
+         * Second, the 'latest' tag.
+         * Pushing multiple tags is cheap, as all the layers are reused. */
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-id') {
+            app.push("${env.BUILD_NUMBER}")
+            app.push("latest")
         }
     }
 }
