@@ -3,15 +3,13 @@ node {
 
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
-
         checkout scm
     }
 
     stage('Build image') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
-
-        app = docker.build("skandersoltane/flask-hello-world")
+        app = docker.build('skandersoltane/flask-hello-world')
     }
 
     stage('Push image') {
@@ -21,14 +19,20 @@ node {
          * Pushing multiple tags is cheap, as all the layers are reused. */
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-id') {
             app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
+            app.push('latest')
         }
     }
 
-    stage('Run Ansible Playbook') {
-            steps {
-                sh 'ansible-playbook  kubectl-setup-playbook.yml'
-            }
+    stage('Ansible') {
+        /* Move the Ansible playbook execution directly within the stage */
+        script {
+            sh 'ansible-playbook kubectl-setup-playbook.yaml'
         }
+    }
 
+    stage('Deploy') {
+        script {
+          sh 'kubectl set image deployment/hello-world hello-world=skandersoltane/flask-hello-world:${env.BUILD_NUMBER}'
+        }
+    }
 }
