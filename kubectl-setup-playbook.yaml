@@ -1,0 +1,13 @@
+---
+- name: Installing and Configuring Kubectl
+  hosts: localhost
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Download the latest release
+      shell: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+    - name: Install Kubectl
+      shell: install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - name: Download Kubeconfig
+      shell: wget -O /home/.kube/config https://rcwebsite.blob.core.windows.net/assets/config
