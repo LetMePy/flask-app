@@ -24,4 +24,9 @@ node {
             app.push("latest")
         }
     }
+
+    stage('Ansible Deploy') {
+                // Use Ansible to deploy the application
+                ansiblePlaybook(playbook: 'deploy.yml', inventory: 'inventory.ini')
+    }
 }
