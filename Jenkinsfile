@@ -32,7 +32,7 @@ node {
 
     stage('Deploy') {
         script {
-          sh 'kubectl set image deployment/hello-world hello-world=skandersoltane/flask-hello-world:${env.BUILD_NUMBER}'
+            sh 'kubectl set image deployment/hello-world hello-world=skandersoltane/flask-hello-world:${env.BUILD_NUMBER}'
         }
     }
 }
